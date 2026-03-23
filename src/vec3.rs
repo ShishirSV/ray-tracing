@@ -25,7 +25,7 @@ impl Vec3 {
         }
     }
 
-    fn multiply(&self, other: &Vec3, scalar: f32) -> Self {
+    fn multiply(&self, scalar: f32) -> Self {
         Vec3 {
             x: self.x * scalar,
             y: self.y * scalar,
@@ -33,7 +33,7 @@ impl Vec3 {
         }
     }
 
-    fn divide(&self, other: &Vec3, scalar: f32) -> Self {
+    fn divide(&self, scalar: f32) -> Self {
         Vec3 {
             x: self.x / scalar,
             y: self.y / scalar,
@@ -42,9 +42,7 @@ impl Vec3 {
     }
 
     fn dot(&self, other: &Vec3) -> f32 {
-        let result = (self.x * other.x) + (self.y * other.y) + (self.z * other.y);
-
-        result.sqrt()
+        (self.x * other.x) + (self.y * other.y) + (self.z * other.z)
     }
 
     fn cross(&self, other: &Vec3) -> Self {
@@ -63,11 +61,19 @@ impl Vec3 {
         }
     }
 
-    fn componentMultipy(&self, other: &Vec3) -> Self {
+    fn component_multipy(&self, other: &Vec3) -> Self {
         Vec3 {
             x: self.x * other.x,
             y: self.y * other.y,
             z: self.z * other.z,
         }
+    }
+
+    fn magnitude(&self) -> f32 {
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
+
+    fn normalise(&self) -> Self {
+        self.divide(self.magnitude())
     }
 }

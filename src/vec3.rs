@@ -1,15 +1,16 @@
-struct Vec3 {
-    x: f32,
-    y: f32,
-    z: f32,
+#[derive(Debug, Clone, Copy)]
+pub struct Vec3 {
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
 
 impl Vec3 {
-    fn new(x: f32, y: f32, z: f32) -> Self {
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
     }
 
-    fn add(&self, other: &Vec3) -> Self {
+    pub fn add(&self, other: &Vec3) -> Self {
         Vec3 {
             x: self.x + other.x,
             y: self.y + other.y,
@@ -17,7 +18,7 @@ impl Vec3 {
         }
     }
 
-    fn subtract(&self, other: &Vec3) -> Self {
+    pub fn subtract(&self, other: &Vec3) -> Self {
         Vec3 {
             x: self.x - other.x,
             y: self.y - other.y,
@@ -25,7 +26,7 @@ impl Vec3 {
         }
     }
 
-    fn multiply(&self, scalar: f32) -> Self {
+    pub fn multiply(&self, scalar: f64) -> Self {
         Vec3 {
             x: self.x * scalar,
             y: self.y * scalar,
@@ -33,7 +34,7 @@ impl Vec3 {
         }
     }
 
-    fn divide(&self, scalar: f32) -> Self {
+    pub fn divide(&self, scalar: f64) -> Self {
         Vec3 {
             x: self.x / scalar,
             y: self.y / scalar,
@@ -41,11 +42,11 @@ impl Vec3 {
         }
     }
 
-    fn dot(&self, other: &Vec3) -> f32 {
+    pub fn dot(&self, other: &Vec3) -> f64 {
         (self.x * other.x) + (self.y * other.y) + (self.z * other.z)
     }
 
-    fn cross(&self, other: &Vec3) -> Self {
+    pub fn cross(&self, other: &Vec3) -> Self {
         let x = self.y * other.z - self.z * other.y;
         let y = self.z * other.x - self.x * other.z;
         let z = self.x * other.y - self.y * other.x;
@@ -53,7 +54,7 @@ impl Vec3 {
         Vec3 { x, y, z }
     }
 
-    fn negate(&self) -> Self {
+    pub fn negate(&self) -> Self {
         Vec3 {
             x: -self.x,
             y: -self.y,
@@ -61,7 +62,7 @@ impl Vec3 {
         }
     }
 
-    fn component_multipy(&self, other: &Vec3) -> Self {
+    pub fn component_multipy(&self, other: &Vec3) -> Self {
         Vec3 {
             x: self.x * other.x,
             y: self.y * other.y,
@@ -69,11 +70,11 @@ impl Vec3 {
         }
     }
 
-    fn magnitude(&self) -> f32 {
-        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    pub fn magnitude(&self) -> f64 {
+        (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
     }
 
-    fn normalise(&self) -> Self {
+    pub fn normalise(&self) -> Self {
         self.divide(self.magnitude())
     }
 }

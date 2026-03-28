@@ -19,15 +19,22 @@ impl Color {
             rgb: Vec3::new(red, green, blue),
         })
     }
-    pub fn red(&self) -> u8 {
+    pub fn get_red(&self) -> u8 {
         (self.rgb.x * 255.0).round() as u8
     }
 
-    pub fn green(&self) -> u8 {
+    pub fn get_green(&self) -> u8 {
         (self.rgb.y * 255.0).round() as u8
     }
-    pub fn blue(&self) -> u8 {
+
+    pub fn get_blue(&self) -> u8 {
         (self.rgb.z * 255.0).round() as u8
+    }
+
+    pub fn black() -> Self {
+        Self {
+            rgb: Vec3::new(1.0, 1.0, 1.0),
+        }
     }
 }
 

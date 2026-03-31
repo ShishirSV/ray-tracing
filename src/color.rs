@@ -42,7 +42,10 @@ impl TryFrom<Vec3> for Color {
     type Error = ColorError;
 
     fn try_from(v: Vec3) -> Result<Self, Self::Error> {
-        if v.x < 0.0 || v.y < 0.0 || v.z < 0.0 || v.x > 1.0 || v.y > 1.0 || v.z > 1.0 {
+        let min = v.x.min(v.y).min(v.z);
+        let max = v.x.max(v.y).max(v.z);
+
+        if min < 0.0 || max > 1.0 {
             return Err(ColorError::OutOfBounds(format!(
                 "RGB values should be between 0.0 and 1.0 inclusive"
             )));

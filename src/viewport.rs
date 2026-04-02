@@ -16,22 +16,25 @@ pub struct Viewport {
 
 impl Viewport {
     pub fn new(width: f64, height: f64, camera_direction: Vec3) -> Self {
-        let right: Vec3;
-        let up: Vec3;
+        let fwd = camera_direction.normalise();
 
-        // According to right hand rule
-        if !camera_direction.equals(&UP) {
-            right = camera_direction.cross(&UP);
-            up = right.cross(&camera_direction);
+        let (right, up) = if fwd.dot(&UP).abs() < 0.999 {
+            // Standard case: Not looking straight up or down
+            let r = fwd.cross(&UP).normalise();
+            let u = r.cross(&fwd); // Already unit length because fwd and r are orthogonal units
+            (r, u)
         } else {
-            up = RIGHT.cross(&camera_direction);
-            right = camera_direction.cross(&up);
-        }
+            // Edge case: Looking straight up or down
+            // Use RIGHT as the temporary reference instead
+            let u = RIGHT.cross(&fwd).normalise();
+            let r = fwd.cross(&u);
+            (r, u)
+        };
 
         Self {
             half_width: width / 2.0,
             half_height: height / 2.0,
-            local_forward: camera_direction,
+            local_forward: fwd,
             local_up: up,
             local_right: right,
         }

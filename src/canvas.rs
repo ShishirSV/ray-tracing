@@ -33,7 +33,7 @@ impl Canvas {
                     color.get_red(),
                     color.get_green(),
                     color.get_blue()
-                );
+                )?;
             }
         }
 

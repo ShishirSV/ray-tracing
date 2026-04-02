@@ -6,8 +6,12 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
-    pub fn new(x: f64, y: f64, z: f64) -> Self {
+    pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
+    }
+
+    pub fn equals(&self, other: &Vec3) -> bool {
+        self.x == other.x && self.y == other.y && self.z == other.z
     }
 
     pub fn add(&self, other: &Vec3) -> Self {

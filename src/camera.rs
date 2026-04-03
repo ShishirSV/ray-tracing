@@ -19,7 +19,7 @@ impl Camera {
         Self {
             position,
             viewport: Viewport::new(viewport_width, viewport_height, look_direction),
-            look_direction,
+            look_direction: look_direction.normalise(),
         }
     }
 }

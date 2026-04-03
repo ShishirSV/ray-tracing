@@ -34,9 +34,9 @@ impl Viewport {
         Self {
             half_width: width / 2.0,
             half_height: height / 2.0,
-            local_forward: fwd,
-            local_up: up,
-            local_right: right,
+            local_forward: fwd.normalise(),
+            local_up: up.normalise(),
+            local_right: right.normalise(),
         }
     }
 }

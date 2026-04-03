@@ -6,6 +6,7 @@ pub struct Canvas {
     pub width: usize,
     pub height: usize,
     pub pixels: Vec<Vec<Color>>,
+    pub is_set: Vec<Vec<bool>>,
 }
 
 impl Canvas {
@@ -14,6 +15,17 @@ impl Canvas {
             width,
             height,
             pixels: vec![vec![Color::black(); width]; height],
+            is_set: vec![vec![false; width]; height],
+        }
+    }
+
+    pub fn reset(&mut self) {
+        for row in self.is_set.iter_mut() {
+            row.fill(false);
+        }
+
+        for row in self.pixels.iter_mut() {
+            row.fill(Color::black());
         }
     }
 

@@ -19,6 +19,17 @@ impl Color {
             rgb: Vec3::new(red, green, blue),
         })
     }
+
+    pub fn tone(color_vector: &Vec3) -> Self {
+        let red = color_vector.x / (color_vector.x + 1.0);
+        let green = color_vector.y / (color_vector.y + 1.0);
+        let blue = color_vector.z / (color_vector.z + 1.0);
+
+        Self {
+            rgb: Vec3::new(red, blue, green),
+        }
+    }
+
     pub fn get_red(&self) -> u8 {
         (self.rgb.x * 255.0).round() as u8
     }

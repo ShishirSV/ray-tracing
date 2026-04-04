@@ -66,7 +66,7 @@ impl Vec3 {
         }
     }
 
-    pub fn component_multipy(&self, other: &Vec3) -> Self {
+    pub fn component_multiply(&self, other: &Vec3) -> Self {
         Vec3 {
             x: self.x * other.x,
             y: self.y * other.y,
@@ -80,5 +80,21 @@ impl Vec3 {
 
     pub fn normalise(&self) -> Self {
         self.divide(self.magnitude())
+    }
+
+    pub fn max(&self, value: f64) -> Self {
+        Self {
+            x: self.x.max(value),
+            y: self.y.max(value),
+            z: self.z.max(value),
+        }
+    }
+
+    pub fn min(&self, value: f64) -> Self {
+        Self {
+            x: self.x.min(value),
+            y: self.y.min(value),
+            z: self.z.min(value),
+        }
     }
 }

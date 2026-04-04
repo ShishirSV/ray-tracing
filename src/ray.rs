@@ -17,7 +17,7 @@ impl Ray {
         Vec3::new(
             self.origin.x + d.x,
             self.origin.y + d.y,
-            self.origin.z + d.y,
+            self.origin.z + d.z,
         )
     }
 }

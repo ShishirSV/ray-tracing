@@ -26,7 +26,7 @@ impl Color {
         let blue = color_vector.z / (color_vector.z + 1.0);
 
         Self {
-            rgb: Vec3::new(red, blue, green),
+            rgb: Vec3::new(red, green, blue),
         }
     }
 

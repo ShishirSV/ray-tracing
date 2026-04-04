@@ -1,3 +1,10 @@
+pub mod camera;
+pub mod canvas;
 pub mod color;
+pub mod lights;
 pub mod ray;
+pub mod shapes;
+pub mod utils;
 pub mod vec3;
+pub mod viewport;
+pub mod world;

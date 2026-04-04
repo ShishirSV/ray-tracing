@@ -19,15 +19,33 @@ impl Color {
             rgb: Vec3::new(red, green, blue),
         })
     }
-    pub fn red(&self) -> u8 {
+
+    pub fn tone(color_vector: &Vec3) -> Self {
+        let red = color_vector.x / (color_vector.x + 1.0);
+        let green = color_vector.y / (color_vector.y + 1.0);
+        let blue = color_vector.z / (color_vector.z + 1.0);
+
+        Self {
+            rgb: Vec3::new(red, green, blue),
+        }
+    }
+
+    pub fn get_red(&self) -> u8 {
         (self.rgb.x * 255.0).round() as u8
     }
 
-    pub fn green(&self) -> u8 {
+    pub fn get_green(&self) -> u8 {
         (self.rgb.y * 255.0).round() as u8
     }
-    pub fn blue(&self) -> u8 {
+
+    pub fn get_blue(&self) -> u8 {
         (self.rgb.z * 255.0).round() as u8
+    }
+
+    pub fn black() -> Self {
+        Self {
+            rgb: Vec3::new(1.0, 1.0, 1.0),
+        }
     }
 }
 
@@ -35,7 +53,10 @@ impl TryFrom<Vec3> for Color {
     type Error = ColorError;
 
     fn try_from(v: Vec3) -> Result<Self, Self::Error> {
-        if v.x < 0.0 || v.y < 0.0 || v.z < 0.0 || v.x > 1.0 || v.y > 1.0 || v.z > 1.0 {
+        let min = v.x.min(v.y).min(v.z);
+        let max = v.x.max(v.y).max(v.z);
+
+        if min < 0.0 || max > 1.0 {
             return Err(ColorError::OutOfBounds(format!(
                 "RGB values should be between 0.0 and 1.0 inclusive"
             )));

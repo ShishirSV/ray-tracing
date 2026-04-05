@@ -2,13 +2,13 @@ use std::f64;
 
 use crate::{
     camera::Camera, canvas::Canvas, color::Color, lights::point_light::PointLight, ray::Ray,
-    shapes::sphere::Sphere, vec3::Vec3,
+    shapes::Shape, vec3::Vec3,
 };
 
 pub struct World {
     pub camera: Camera,
     pub canvas: Canvas,
-    pub objects: Vec<Sphere>,
+    pub objects: Vec<Box<dyn Shape>>,
     pub lights: Vec<PointLight>,
 
     // Color returned when the ray hit nothing
@@ -44,37 +44,6 @@ impl World {
         self.ambient_color = color;
     }
 
-    fn solve(&self, ray: &Ray, object: &Sphere) -> (Option<Vec3>, f64) {
-        // Solving intersection equations
-        // at^2 + bt + c = 0
-        let a = ray.direction.dot(&ray.direction);
-        let b = 2.0 * (ray.origin.dot(&ray.direction) - object.centre.dot(&ray.direction));
-        let c = ray.origin.dot(&ray.origin) - 2.0 * ray.origin.dot(&object.centre)
-            + object.centre.dot(&object.centre)
-            - object.radius.powi(2);
-
-        let d = b.powi(2) - 4.0 * a * c;
-        if d < 0.0 {
-            return (None, 0.0);
-        }
-
-        // Solutions for time(t) when the ray intersects the object
-        let s1 = (-b + d.sqrt()) / (2.0 * a);
-        let s2 = (-b - d.sqrt()) / (2.0 * a);
-
-        let mut t = s1.min(s2);
-        if t < 0.0 {
-            t = s1.max(s2);
-        }
-
-        // Both negative
-        if t < 0.0 {
-            return (None, 0.0);
-        }
-
-        (Some(ray.at(t)), t)
-    }
-
     fn check_ligthing(&self, point: &Vec3, object_color: &Color, normal: &Vec3) -> Color {
         let mut final_color = object_color
             .rgb
@@ -88,13 +57,13 @@ impl World {
             let mut reaches = true;
 
             for object in &self.objects {
-                let (point, distance) = self.solve(&light_ray, object);
+                let record = object.hit(&light_ray);
 
-                if let Some(_point) = point {
+                if let Some(record) = record {
                     // It is blocked by some other object before reaching the point
                     // Subtracting 0.0001 to prevent cases where object seems to block itself due
                     // to float precision
-                    if distance > 0.0 && distance < (los_distance - 0.0001) {
+                    if record.distance > 0.0 && record.distance < (los_distance - 0.0001) {
                         reaches = false;
                         break;
                     }
@@ -129,14 +98,14 @@ impl World {
 
         // Check if ray hits any of the objects(take the first one)
         for object in &self.objects {
-            let (point, distance) = self.solve(ray, object);
+            let record = object.hit(ray);
 
-            if let Some(point) = point {
-                if distance < intersection_distance {
-                    intersection_distance = distance;
-                    intersection_point = Some(point);
-                    object_color = object.color;
-                    normal = point.subtract(&object.centre).normalise();
+            if let Some(record) = record {
+                if record.distance < intersection_distance {
+                    intersection_distance = record.distance;
+                    intersection_point = Some(record.point);
+                    object_color = record.color;
+                    normal = record.normal;
                 }
             }
         }

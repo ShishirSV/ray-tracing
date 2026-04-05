@@ -34,11 +34,11 @@ fn main() {
     world.lights.push(light);
 
     // Add a Sphere
-    let red_sphere = Sphere::new(
+    let red_sphere = Box::new(Sphere::new(
         Vec3::new(0.0, 0.0, -5.0),
         1.0,
         Color::new(1.0, 0.0, 0.0).unwrap(),
-    );
+    ));
     world.objects.push(red_sphere);
 
     // Render Loop

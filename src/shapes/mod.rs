@@ -10,5 +10,5 @@ pub struct HitRecord {
 }
 
 pub trait Shape {
-    fn hit(&self, ray: Ray) -> Option<HitRecord>;
+    fn hit(&self, ray: &Ray) -> Option<HitRecord>;
 }

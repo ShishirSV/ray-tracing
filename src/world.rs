@@ -1,15 +1,15 @@
 use std::f64;
 
 use crate::{
-    camera::Camera, canvas::Canvas, color::Color, lights::point_light::PointLight, ray::Ray,
-    shapes::Shape, vec3::Vec3,
+    camera::Camera, canvas::Canvas, color::Color, lights::Light, ray::Ray, shapes::Shape,
+    vec3::Vec3,
 };
 
 pub struct World {
     pub camera: Camera,
     pub canvas: Canvas,
     pub objects: Vec<Box<dyn Shape>>,
-    pub lights: Vec<PointLight>,
+    pub lights: Vec<Box<dyn Light>>,
 
     // Color returned when the ray hit nothing
     pub background: Color,
@@ -44,16 +44,17 @@ impl World {
         self.ambient_color = color;
     }
 
-    fn check_ligthing(&self, point: &Vec3, object_color: &Color, normal: &Vec3) -> Color {
+    fn check_lighting(&self, point: &Vec3, object_color: &Color, normal: &Vec3) -> Color {
         let mut final_color = object_color
             .rgb
             .component_multiply(&self.ambient_color.rgb)
             .multiply(self.ambient_intensity);
 
         for light in &self.lights {
-            let los = point.subtract(&light.position);
-            let los_distance = los.magnitude();
-            let light_ray = Ray::new(light.position, los.normalise());
+            let illumination = light.get_illumination(point);
+            let light_to_point = illumination.point_to_light.negate();
+            let los_distance = illumination.distance;
+            let light_ray = Ray::new(illumination.source_position, light_to_point);
             let mut reaches = true;
 
             for object in &self.objects {
@@ -74,15 +75,11 @@ impl World {
                 continue;
             }
 
-            let point_to_light = &light.position.subtract(point).normalise();
-            let diffuse_intensity = normal.dot(&point_to_light).max(0.0);
-            let falloff = 1.0 / los_distance.powi(2);
+            let diffuse_intensity = normal.dot(&illumination.point_to_light).max(0.0);
             let light_contribution = object_color
                 .rgb
-                .component_multiply(&light.color.rgb)
-                .multiply(light.intensity)
-                .multiply(diffuse_intensity)
-                .multiply(falloff);
+                .component_multiply(&illumination.light)
+                .multiply(diffuse_intensity);
             final_color = final_color.add(&light_contribution);
         }
 
@@ -112,7 +109,7 @@ impl World {
 
         // Check if light from the light sources reaches the above pixel
         if let Some(point) = intersection_point {
-            let pixel_color = self.check_ligthing(&point, &object_color, &normal);
+            let pixel_color = self.check_lighting(&point, &object_color, &normal);
             return pixel_color;
         }
 

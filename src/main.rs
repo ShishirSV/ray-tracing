@@ -31,15 +31,15 @@ fn main() {
         color: Color::new(1.0, 1.0, 1.0).unwrap(),
         intensity: 50.0, // High intensity for falloff distance
     };
-    world.lights.push(light);
+    world.lights.push(Box::new(light));
 
     // Add a Sphere
-    let red_sphere = Box::new(Sphere::new(
+    let red_sphere = Sphere::new(
         Vec3::new(0.0, 0.0, -5.0),
         1.0,
         Color::new(1.0, 0.0, 0.0).unwrap(),
-    ));
-    world.objects.push(red_sphere);
+    );
+    world.objects.push(Box::new(red_sphere));
 
     // Render Loop
     for row in 0..height {

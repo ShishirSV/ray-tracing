@@ -1,11 +1,12 @@
-use crate::{color::Color, vec3::Vec3};
+use crate::vec3::Vec3;
 
 pub mod point_light;
 
 pub struct Illumination {
-    pub direction: Vec3, // Vector from the surface point to the light
-    pub distance: f64,   // Distance between light and the point
-    pub color: Color,    // The intensity reaching the point(falloff)
+    pub source_position: Vec3,
+    pub point_to_light: Vec3, // Vector from the surface point to the light
+    pub distance: f64,        // Distance between light and the point
+    pub light: Vec3,          // The intensity reaching the point(falloff)
 }
 
 pub trait Light {

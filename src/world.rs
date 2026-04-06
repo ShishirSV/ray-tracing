@@ -1,8 +1,8 @@
 use std::f64;
 
 use crate::{
-    camera::Camera, canvas::Canvas, color::Color, lights::Light, ray::Ray, shapes::Shape,
-    vec3::Vec3,
+    camera::Camera, canvas::Canvas, color::Color, lights::Light, materials::Material, ray::Ray,
+    shapes::Shape, vec3::Vec3,
 };
 
 pub struct World {
@@ -44,11 +44,10 @@ impl World {
         self.ambient_color = color;
     }
 
-    fn check_lighting(&self, point: &Vec3, object_color: &Color, normal: &Vec3) -> Color {
-        let mut final_color = object_color
-            .rgb
-            .component_multiply(&self.ambient_color.rgb)
-            .multiply(self.ambient_intensity);
+    fn check_lighting(&self, point: &Vec3, normal: &Vec3, material: &dyn Material) -> Color {
+        let point_to_camera = self.camera.position.subtract(point).normalise();
+        let ambient_light = self.ambient_color.rgb.multiply(self.ambient_intensity);
+        let mut total_light_energy = material.ambient(&ambient_light);
 
         for light in &self.lights {
             let illumination = light.get_illumination(point);
@@ -75,22 +74,23 @@ impl World {
                 continue;
             }
 
-            let diffuse_intensity = normal.dot(&illumination.point_to_light).max(0.0);
-            let light_contribution = object_color
-                .rgb
-                .component_multiply(&illumination.light)
-                .multiply(diffuse_intensity);
-            final_color = final_color.add(&light_contribution);
+            let energy = material.shade(
+                normal,
+                &illumination.point_to_light,
+                &point_to_camera,
+                &illumination.light,
+            );
+            total_light_energy = total_light_energy.add(&energy);
         }
 
-        Color::tone(&final_color)
+        Color::tone(&total_light_energy)
     }
 
     pub fn trace(&self, ray: &Ray) -> Color {
         // Initialising the intersection variables
         let mut intersection_point: Option<Vec3> = None; // Nearest point of intersection
         let mut intersection_distance = f64::INFINITY; // Distance from camera to nearest point
-        let mut object_color = Color::black(); // Color at the intersected point
+        let mut object_material: Option<&dyn Material> = None; // Material at the intersected point
         let mut normal = Vec3::new(-1.0, -1.0, -1.0); // Surface normal for object at intersection
 
         // Check if ray hits any of the objects(take the first one)
@@ -101,15 +101,15 @@ impl World {
                 if record.distance < intersection_distance {
                     intersection_distance = record.distance;
                     intersection_point = Some(record.point);
-                    object_color = record.color;
                     normal = record.normal;
+                    object_material = Some(record.material);
                 }
             }
         }
 
         // Check if light from the light sources reaches the above pixel
-        if let Some(point) = intersection_point {
-            let pixel_color = self.check_lighting(&point, &object_color, &normal);
+        if let (Some(point), Some(material)) = (intersection_point, object_material) {
+            let pixel_color = self.check_lighting(&point, &normal, material);
             return pixel_color;
         }
 

@@ -1,5 +1,5 @@
 use crate::{
-    color::Color,
+    materials::Material,
     ray::Ray,
     shapes::{HitRecord, Shape},
     vec3::Vec3,
@@ -8,21 +8,21 @@ use crate::{
 pub struct Sphere {
     pub centre: Vec3,
     pub radius: f64,
-    pub color: Color,
+    pub material: Box<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(centre: Vec3, radius: f64, color: Color) -> Self {
+    pub fn new(centre: Vec3, radius: f64, material: Box<dyn Material>) -> Self {
         Self {
             centre,
             radius,
-            color,
+            material,
         }
     }
 }
 
 impl Shape for Sphere {
-    fn hit(&self, ray: &Ray) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray) -> Option<HitRecord<'_>> {
         // Solving intersection equations
         // at^2 + bt + c = 0
         let a = ray.direction.dot(&ray.direction);
@@ -57,7 +57,7 @@ impl Shape for Sphere {
             distance: t,
             point,
             normal,
-            color: self.color,
+            material: self.material.as_ref(),
         })
     }
 }

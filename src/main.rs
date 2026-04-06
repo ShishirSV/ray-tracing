@@ -2,6 +2,7 @@ use ray_tracing::camera::Camera;
 use ray_tracing::canvas::Canvas;
 use ray_tracing::color::Color;
 use ray_tracing::lights::point_light::PointLight;
+use ray_tracing::materials::metallic::Metallic;
 use ray_tracing::shapes::sphere::Sphere;
 use ray_tracing::vec3::Vec3;
 use ray_tracing::world::World;
@@ -31,15 +32,17 @@ fn main() {
         color: Color::new(1.0, 1.0, 1.0).unwrap(),
         intensity: 50.0, // High intensity for falloff distance
     };
-    world.lights.push(light);
+    world.lights.push(Box::new(light));
 
     // Add a Sphere
-    let red_sphere = Sphere::new(
-        Vec3::new(0.0, 0.0, -5.0),
-        1.0,
-        Color::new(1.0, 0.0, 0.0).unwrap(),
+    let red_metallic = Metallic::new(
+        Color::new(1.0, 0.0, 0.0).unwrap(), // base_color: Red
+        0.8,                                // diffuse_intensity
+        20.0,                               // shininess
+        2.0,                                // specular intensity
     );
-    world.objects.push(red_sphere);
+    let red_sphere = Sphere::new(Vec3::new(0.0, 0.0, -5.0), 1.0, Box::new(red_metallic));
+    world.objects.push(Box::new(red_sphere));
 
     // Render Loop
     for row in 0..height {

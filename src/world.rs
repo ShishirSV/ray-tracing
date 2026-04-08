@@ -86,33 +86,54 @@ impl World {
         Color::tone(&total_light_energy)
     }
 
-    pub fn trace(&self, ray: &Ray) -> Color {
-        // Initialising the intersection variables
-        let mut intersection_point: Option<Vec3> = None; // Nearest point of intersection
-        let mut intersection_distance = f64::INFINITY; // Distance from camera to nearest point
-        let mut object_material: Option<&dyn Material> = None; // Material at the intersected point
-        let mut normal = Vec3::new(-1.0, -1.0, -1.0); // Surface normal for object at intersection
+    pub fn trace(&self, rays: &Vec<Ray>) -> Color {
+        let mut colors: Vec<Color> = Vec::with_capacity(rays.len());
 
-        // Check if ray hits any of the objects(take the first one)
-        for object in &self.objects {
-            let record = object.hit(ray);
+        for ray in rays {
+            // Initialising the intersection variables
+            let mut intersection_point: Option<Vec3> = None; // Nearest point of intersection
+            let mut intersection_distance = f64::INFINITY; // Distance from camera to nearest point
+            let mut object_material: Option<&dyn Material> = None; // Material at the intersected point
+            let mut normal = Vec3::new(-1.0, -1.0, -1.0); // Surface normal for object at intersection
 
-            if let Some(record) = record {
-                if record.distance < intersection_distance {
-                    intersection_distance = record.distance;
-                    intersection_point = Some(record.point);
-                    normal = record.normal;
-                    object_material = Some(record.material);
+            // Check if ray hits any of the objects(take the first one)
+            for object in &self.objects {
+                let record = object.hit(ray);
+
+                if let Some(record) = record {
+                    if record.distance < intersection_distance {
+                        intersection_distance = record.distance;
+                        intersection_point = Some(record.point);
+                        normal = record.normal;
+                        object_material = Some(record.material);
+                    }
                 }
             }
+
+            // Check if light from the light sources reaches the above pixel
+            let color = if let (Some(point), Some(material)) = (intersection_point, object_material)
+            {
+                let pixel_color = self.check_lighting(&point, &normal, material);
+                pixel_color
+            } else {
+                self.background
+            };
+
+            colors.push(color);
         }
 
-        // Check if light from the light sources reaches the above pixel
-        if let (Some(point), Some(material)) = (intersection_point, object_material) {
-            let pixel_color = self.check_lighting(&point, &normal, material);
-            return pixel_color;
+        self.color_average(&colors)
+    }
+
+    fn color_average(&self, colors: &Vec<Color>) -> Color {
+        let mut all = Vec3::new(0.0, 0.0, 0.0);
+
+        for color in colors {
+            all = all.add(&color.rgb);
         }
 
-        self.background
+        let averge = all.divide(colors.len() as f64);
+
+        Color::try_from(averge).unwrap_or(self.background)
     }
 }

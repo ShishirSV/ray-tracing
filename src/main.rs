@@ -47,8 +47,8 @@ fn main() {
     // Render Loop
     for row in 0..height {
         for col in 0..width {
-            let ray = world.camera.get_ray(row, col, width, height);
-            let pixel_color = world.trace(&ray);
+            let rays = world.camera.get_ray(row, col, width, height);
+            let pixel_color = world.trace(&rays);
             world.canvas.set_pixel(row, col, pixel_color);
         }
     }

@@ -3,7 +3,7 @@ use crate::vec3::Vec3;
 pub mod matte;
 pub mod metallic;
 
-pub trait Material {
+pub trait Material: Send + Sync {
     fn shade(
         &self,
         normal: &Vec3,

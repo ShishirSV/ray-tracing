@@ -9,7 +9,7 @@ pub struct Illumination {
     pub light: Vec3,          // The intensity reaching the point(falloff)
 }
 
-pub trait Light {
+pub trait Light: Send + Sync {
     // Given a point on a surface, what light arrives there?
     fn get_illumination(&self, point: &Vec3) -> Illumination;
 }

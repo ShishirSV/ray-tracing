@@ -9,6 +9,6 @@ pub struct HitRecord<'a> {
     pub material: &'a dyn Material, // Color of the shape
 }
 
-pub trait Shape {
+pub trait Shape: Send + Sync {
     fn hit(&self, ray: &Ray) -> Option<HitRecord<'_>>;
 }

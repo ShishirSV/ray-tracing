@@ -1,9 +1,9 @@
-use std::f64;
-
 use crate::{
     camera::Camera, canvas::Canvas, color::Color, lights::Light, materials::Material, ray::Ray,
     shapes::Shape, vec3::Vec3,
 };
+use rayon::prelude::*;
+use std::f64;
 
 pub struct World {
     pub camera: Camera,
@@ -87,40 +87,41 @@ impl World {
     }
 
     pub fn trace(&self, rays: &Vec<Ray>) -> Color {
-        let mut colors: Vec<Color> = Vec::with_capacity(rays.len());
+        let colors: Vec<Color> = rays
+            .into_par_iter()
+            .map(|ray| {
+                // Initialising the intersection variables
+                let mut intersection_point: Option<Vec3> = None; // Nearest point of intersection
+                let mut intersection_distance = f64::INFINITY; // Distance from camera to nearest point
+                let mut object_material: Option<&dyn Material> = None; // Material at the intersected point
+                let mut normal = Vec3::new(-1.0, -1.0, -1.0); // Surface normal for object at intersection
 
-        for ray in rays {
-            // Initialising the intersection variables
-            let mut intersection_point: Option<Vec3> = None; // Nearest point of intersection
-            let mut intersection_distance = f64::INFINITY; // Distance from camera to nearest point
-            let mut object_material: Option<&dyn Material> = None; // Material at the intersected point
-            let mut normal = Vec3::new(-1.0, -1.0, -1.0); // Surface normal for object at intersection
+                // Check if ray hits any of the objects(take the first one)
+                for object in &self.objects {
+                    let record = object.hit(ray);
 
-            // Check if ray hits any of the objects(take the first one)
-            for object in &self.objects {
-                let record = object.hit(ray);
-
-                if let Some(record) = record {
-                    if record.distance < intersection_distance {
-                        intersection_distance = record.distance;
-                        intersection_point = Some(record.point);
-                        normal = record.normal;
-                        object_material = Some(record.material);
+                    if let Some(record) = record {
+                        if record.distance < intersection_distance {
+                            intersection_distance = record.distance;
+                            intersection_point = Some(record.point);
+                            normal = record.normal;
+                            object_material = Some(record.material);
+                        }
                     }
                 }
-            }
 
-            // Check if light from the light sources reaches the above pixel
-            let color = if let (Some(point), Some(material)) = (intersection_point, object_material)
-            {
-                let pixel_color = self.check_lighting(&point, &normal, material);
-                pixel_color
-            } else {
-                self.background
-            };
+                // Check if light from the light sources reaches the above pixel
+                let color =
+                    if let (Some(point), Some(material)) = (intersection_point, object_material) {
+                        let pixel_color = self.check_lighting(&point, &normal, material);
+                        pixel_color
+                    } else {
+                        self.background
+                    };
 
-            colors.push(color);
-        }
+                color
+            })
+            .collect();
 
         self.color_average(&colors)
     }

@@ -6,6 +6,7 @@ use ray_tracing::materials::metallic::Metallic;
 use ray_tracing::shapes::sphere::Sphere;
 use ray_tracing::vec3::Vec3;
 use ray_tracing::world::World;
+use rayon::prelude::*;
 
 fn main() {
     // Image dimensions
@@ -43,14 +44,24 @@ fn main() {
     );
     let red_sphere = Sphere::new(Vec3::new(0.0, 0.0, -5.0), 1.0, Box::new(red_metallic));
     world.objects.push(Box::new(red_sphere));
+    let world_ref = &world;
 
     // Render Loop
-    for row in 0..height {
-        for col in 0..width {
-            let rays = world.camera.get_ray(row, col, width, height);
-            let pixel_color = world.trace(&rays);
-            world.canvas.set_pixel(row, col, pixel_color);
-        }
+    let pixel_data: Vec<(usize, usize, Color)> = (0..height)
+        .into_par_iter()
+        .flat_map_iter(|row| {
+            (0..width).map(move |col| {
+                let rays = world_ref.camera.get_ray(row, col, width, height);
+                let pixel_color = world_ref.trace(&rays);
+
+                // Return the coordinates with the color so we can map them back
+                (row, col, pixel_color)
+            })
+        })
+        .collect();
+
+    for (row, col, color) in pixel_data {
+        world.canvas.set_pixel(row, col, color);
     }
 
     // Save the output
